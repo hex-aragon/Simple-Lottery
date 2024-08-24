@@ -16,6 +16,7 @@ contract Lottery {
         owner = msg.sender;
     }
     
+    //enter 계정별 3회 체크 
     function enter() public payable {
         require(msg.value == 0.001 ether, "Must send exactly 0.001 ether to enter");
         require(entryCount[msg.sender] < MAX_ENTRIES, "You can only enter 3 times");
@@ -27,16 +28,17 @@ contract Lottery {
         console.log("Total players: %s", players.length);
     }
     
-
+    //chainlink vrf로 변경하려 했으나 진행 못함
     function random() private view returns(uint) {
-    return uint(keccak256(abi.encode(block.timestamp, block.difficulty, block.number, players, msg.sender)));
+        return uint(keccak256(abi.encode(block.timestamp, block.prevrandao, block.number, players, msg.sender)));
     }
 
-
+    //승자 뽑기
     function pickWinner() public onlyOwner {
         require(players.length >= WINNER_COUNT, "Not enough players to pick winners");
         console.log("random: %d",random()); 
         
+        //vrf 변경 필요 
         uint index = random() % (players.length);
         console.log("index: %s",index);
 
@@ -57,7 +59,7 @@ contract Lottery {
         return lastWinners;
     }
 
-    // New helper function to get the length of players array
+    
     function getPlayersLength() public view returns (uint) {
         return players.length;
     }
